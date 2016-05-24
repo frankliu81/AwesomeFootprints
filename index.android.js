@@ -10,21 +10,36 @@ import {
   Text,
   View
 } from 'react-native';
+import BarcodeScanner from 'react-native-barcodescanner';
+
 
 class AwesomeFootprints extends Component {
+  constructor(props) {
+    super(props);
+
+    this.state = {
+      torchMode: 'off',
+      cameraType: 'back',
+      //barCode: '',
+      //barCodetype: '',
+    };
+  }
+
+  barcodeReceived(e) {
+    console.log('Barcode: ' + e.data);
+    console.log('type: ' + e.type);
+    //this.state.barCode = e.data;
+    //this.state.barCodeType = e.type;
+  }
+
   render() {
     return (
-      <View style={styles.container}>
-        <Text style={styles.welcome}>
-          Welcome to React Native!
-        </Text>
-        <Text style={styles.instructions}>
-          To get started, edit index.android.js
-        </Text>
-        <Text style={styles.instructions}>
-          Shake or press menu button for dev menu
-        </Text>
-      </View>
+      <BarcodeScanner
+       onBarCodeRead={this.barcodeReceived}
+       style={{ flex: 1 }}
+       torchMode={this.state.torchMode}
+       cameraType={this.state.cameraType}
+      />
     );
   }
 }
