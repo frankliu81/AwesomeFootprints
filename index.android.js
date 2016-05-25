@@ -20,26 +20,33 @@ class AwesomeFootprints extends Component {
     this.state = {
       torchMode: 'off',
       cameraType: 'back',
-      //barCode: '',
-      //barCodetype: '',
+      barCode: '',
+      barCodeType: ''
     };
   }
 
   barcodeReceived(e) {
-    console.log('Barcode: ' + e.data);
+    // debugger
+    console.log('Barcode 4: ' + e.data);
     console.log('type: ' + e.type);
-    //this.state.barCode = e.data;
-    //this.state.barCodeType = e.type;
+    if (e.type === "UPC_A"){
+      //console.log("Inside UPC_A");
+      if (e.data === "722252212122")
+        console.log("Clif Bar");
+    }
+    this.setState( {barCode: e.data, barCodeType: e.type} );
   }
 
   render() {
+    console.log("render");
     return (
-      <BarcodeScanner
-       onBarCodeRead={this.barcodeReceived}
-       style={{ flex: 1 }}
-       torchMode={this.state.torchMode}
-       cameraType={this.state.cameraType}
-      />
+        <BarcodeScanner
+         onBarCodeRead={this.barcodeReceived.bind(this)}
+         style={{ flex: 1 }}
+         torchMode={this.state.torchMode}
+         cameraType={this.state.cameraType}
+        />
+
     );
   }
 }
