@@ -15,7 +15,75 @@ import {
 } from 'react-native';
 import BarcodeScanner from 'react-native-barcodescanner';
 
+///////////////////
+// Page 1
+///////////////////
+class HomeToolbar extends Component {
+  render() {
+    //debugger
+    return (<View>
+              <View style={styles.toolbar}>
+                <TouchableHighlight style={styles.toolbarButton} underlayColor="grey" onPress={this.props.onPress}>
+                  <Text style={styles.toolbarButtonText}>Scan</Text>
+                </TouchableHighlight>
+                <Text style={styles.toolbarTitle}>
+                  TreadLight.ly
+                </Text>
+                <TouchableHighlight style={styles.toolbarButton} underlayColor="grey" onPress={this.props.onPress}>
+                  <Text style={styles.toolbarButtonText}>Compare</Text>
+                </TouchableHighlight>
+              </View>
+            </View>)
+  }
+}
 
+class Home extends Component {
+  _navigate() {
+    this.props.navigator.push({
+      name: "Scanner",
+      component: Scanner
+    });
+  }
+
+  render() {
+    return <HomeToolbar onPress={this._navigate.bind(this)}/>
+          // Below is put into ScanToolbar
+          // return (<View>
+          //           <View style={styles.toolbar}>
+          //             <TouchableHighlight style={styles.toolbarButton} underlayColor="grey" onPress={() => this._navigate()}>
+          //               <Text style={styles.toolbarButtonText}>Scan</Text>
+          //             </TouchableHighlight>
+          //             <Text style={styles.toolbarTitle}>
+          //               TreadLight.ly
+          //             </Text>
+          //             <TouchableHighlight style={styles.toolbarButton} underlayColor="grey" onPress={() => this._navigate()}>
+          //               <Text style={styles.toolbarButtonText}>Compare</Text>
+          //             </TouchableHighlight>
+          //           </View>
+          //         </View>)
+  }
+}
+
+
+class ScanToolbar extends Component {
+  render() {
+    return (<View>
+              <View style={styles.toolbar}>
+                {/*<TouchableHighlight style={styles.toolbarButton} underlayColor="grey" onPress={this.props.navigator.pop}>*/}
+                <TouchableHighlight style={styles.toolbarButton} underlayColor="grey" onPress={this.props.onPress}>
+                  <Text style={styles.toolbarButtonText}>Back</Text>
+                </TouchableHighlight>
+                <Text style={styles.toolbarTitleOneButton}>
+                  TreadLight.ly
+                </Text>
+              </View>
+           </View>)
+  }
+}
+
+///////////////////
+// Page 2
+///////////////////
 class Scanner extends Component {
   constructor(props) {
     super(props);
@@ -42,14 +110,12 @@ class Scanner extends Component {
   }
 
   _navigate() {
-    this.props.navigator.push({
-      name: "Home",
-      component: Home
-    });
+    this.props.navigator.pop();
   }
 
   render() {
     return (
+      // Refactor into ScanToolbar
       // <View style={styles.container}>
       //   <TouchableHighlight underlayColor="grey" onPress={() => this._navigate()}>
       //     <Text>Back</Text>
@@ -63,48 +129,18 @@ class Scanner extends Component {
       //   />
       // </View>
 
-      <View style={styles.containerToolbar}>
-       <ToolbarAndroid style={styles.toolbar}
-                       title={this.props.title}
-                       //navIcon={require('image!ic_arrow_back_white_24dp')}
-                       navIcon={require('./ic_arrow_back_black_24dp.png')}
-                       onIconClicked={this.props.navigator.pop}
-                       //titleColor={'#FFFFFF'}/>
-                       titleColor={'#000000'}/>
-       {/*<Text>
-         Second screen
-       </Text>*/}
+      <View style={styles.containerScan}>
+       <ScanToolbar onPress={this._navigate.bind(this)}/>
        <BarcodeScanner
            onBarCodeRead={this.barcodeReceived.bind(this)}
-           style={{ height: 400, width: 300 }}
-           //style={{flex: 1}}
+           //style={{ height: 400, width: 300 }}
+           style={{flex: 1}}
            torchMode={this.state.torchMode}
            cameraType={this.state.cameraType}
           />
      </View>
 
     );
-  }
-}
-
-
-class Home extends Component {
-  _navigate() {
-    this.props.navigator.push({
-      name: "Scanner",
-      component: Scanner
-    });
-  }
-
-  render() {
-    return (<View style={styles.container}>
-              <TouchableHighlight style={styles.button} underlayColor="grey" onPress={() => this._navigate()}>
-                <Text>Scan</Text>
-              </TouchableHighlight>
-              <Text>
-                Welcome these are the instructions
-              </Text>
-            </View>)
   }
 }
 
@@ -142,10 +178,11 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     backgroundColor: '#F5FCFF',
   },
-  containerToolbar: {
+  containerScan: {
     flex: 1,
-    //justifyContent: 'center',
-    justifyContent: 'flex-start',
+    justifyContent: 'center',
+    // without alignItems stretch, the scanner appear to have zero width,
+    // and the toolbar won't stretch out
     // https://github.com/facebook/react-native/issues/2957#event-417214498
     alignItems: 'stretch',
     backgroundColor: '#F5FCFF',
@@ -160,14 +197,44 @@ const styles = StyleSheet.create({
     color: '#333333',
     marginBottom: 5,
   },
-  toolbar: {
+  toolbarAndroid: {
     backgroundColor: '#e9eaed',
     height: 56,
   },
-  button: {
-    marginTop: 20,
-    marginBottom: 20,
+  toolbar: {
+    backgroundColor:'#81c04d',
+    paddingTop:30,
+    paddingBottom:10,
+    flexDirection:'row'
+  },
+  toolbarButton:{
+    width: 100,
+    marginLeft: 20,
+    //color:'#fff',
+    //textAlign:'center'
+  },
+  toolbarButtonText:{
+    color:'#fff',
+    fontSize: 20,
+  },
+  toolbarTitle:{
+    color:'#fff',
+    textAlign:'center',
+    fontWeight:'bold',
+    flex:1,
+    fontSize: 20,
+  },
+  toolbarTitleOneButton:{
+    color:'#fff',
+    justifyContent: 'flex-start',
+    fontWeight:'bold',
+    flex:1,
+    fontSize: 20,
   }
+  // button: {
+  //   marginTop: 20,
+  //   marginBottom: 20,
+  // }
 });
 
 AppRegistry.registerComponent('AwesomeFootprints', () => AwesomeFootprints);
