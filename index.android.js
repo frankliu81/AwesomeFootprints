@@ -8,12 +8,14 @@ import {
   AppRegistry,
   StyleSheet,
   Text,
-  View
+  TouchableHighlight,
+  View,
+  Navigator
 } from 'react-native';
 import BarcodeScanner from 'react-native-barcodescanner';
 
 
-class AwesomeFootprints extends Component {
+class Scanner extends Component {
   constructor(props) {
     super(props);
 
@@ -27,8 +29,9 @@ class AwesomeFootprints extends Component {
 
   barcodeReceived(e) {
     // debugger
-    console.log('Barcode 4: ' + e.data);
+    console.log('Barcode: ' + e.data);
     console.log('type: ' + e.type);
+    //debugger
     if (e.type === "UPC_A"){
       //console.log("Inside UPC_A");
       if (e.data === "722252212122")
@@ -37,19 +40,88 @@ class AwesomeFootprints extends Component {
     this.setState( {barCode: e.data, barCodeType: e.type} );
   }
 
+  _navigate() {
+    this.props.navigator.push({
+      name: "Home",
+      component: Home
+    });
+  }
+
   render() {
-    console.log("render");
     return (
-        <BarcodeScanner
+      <View style={styles.container}>
+        <TouchableHighlight underlayColor="grey" onPress={() => this._navigate()}>
+          <Text>Back</Text>
+        </TouchableHighlight>
+         <BarcodeScanner
          onBarCodeRead={this.barcodeReceived.bind(this)}
-         style={{ flex: 1 }}
+         style={{ height: 400, width: 300 }}
+         //style={{flex: 1}}
          torchMode={this.state.torchMode}
          cameraType={this.state.cameraType}
         />
-
+      </View>
     );
   }
 }
+
+
+class Home extends Component {
+  _navigate() {
+    this.props.navigator.push({
+      name: "Scanner",
+      component: Scanner
+    });
+  }
+
+  //onPressButton: function(){
+  //   console.log("Button Pressed");
+  // }
+
+  onPressButton(){
+      //debugger;
+      console.log("Button Pressed");
+  }
+
+
+  render() {
+    return (<View style={styles.container}>
+              <TouchableHighlight underlayColor="grey" onPress={() => this._navigate()}>
+                <Text>Scan</Text>
+              </TouchableHighlight>
+              <Text>
+                Welcome these are the instructions
+              </Text>
+            </View>)
+  }
+}
+
+
+class AwesomeFootprints extends Component {
+
+  _renderScene (route, navigator) {
+      var Component = route.component;
+      return (
+        <Component {...route.props} navigator={navigator} route={route} />
+      );
+  }
+
+  render() {
+    //console.log("In AwesomeFootprints component");
+    return (
+      <Navigator
+        initialRoute={{
+          name: "Home",
+          component: Home
+        }}
+        configureScene={() => {
+          return Navigator.SceneConfigs.FloatFromRight;
+        }}
+        renderScene={this._renderScene} />
+    );
+  }
+}
+
 
 const styles = StyleSheet.create({
   container: {
