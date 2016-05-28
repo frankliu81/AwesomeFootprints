@@ -10,7 +10,8 @@ import {
   Text,
   TouchableHighlight,
   View,
-  Navigator
+  Navigator,
+  ToolbarAndroid
 } from 'react-native';
 import BarcodeScanner from 'react-native-barcodescanner';
 
@@ -49,18 +50,39 @@ class Scanner extends Component {
 
   render() {
     return (
-      <View style={styles.container}>
-        <TouchableHighlight underlayColor="grey" onPress={() => this._navigate()}>
-          <Text>Back</Text>
-        </TouchableHighlight>
-         <BarcodeScanner
-         onBarCodeRead={this.barcodeReceived.bind(this)}
-         style={{ height: 400, width: 300 }}
-         //style={{flex: 1}}
-         torchMode={this.state.torchMode}
-         cameraType={this.state.cameraType}
-        />
-      </View>
+      // <View style={styles.container}>
+      //   <TouchableHighlight underlayColor="grey" onPress={() => this._navigate()}>
+      //     <Text>Back</Text>
+      //   </TouchableHighlight>
+      //    <BarcodeScanner
+      //    onBarCodeRead={this.barcodeReceived.bind(this)}
+      //    style={{ height: 400, width: 300 }}
+      //    //style={{flex: 1}}
+      //    torchMode={this.state.torchMode}
+      //    cameraType={this.state.cameraType}
+      //   />
+      // </View>
+
+      <View style={styles.containerToolbar}>
+       <ToolbarAndroid style={styles.toolbar}
+                       title={this.props.title}
+                       //navIcon={require('image!ic_arrow_back_white_24dp')}
+                       navIcon={require('./ic_arrow_back_black_24dp.png')}
+                       onIconClicked={this.props.navigator.pop}
+                       //titleColor={'#FFFFFF'}/>
+                       titleColor={'#000000'}/>
+       {/*<Text>
+         Second screen
+       </Text>*/}
+       <BarcodeScanner
+           onBarCodeRead={this.barcodeReceived.bind(this)}
+           style={{ height: 400, width: 300 }}
+           //style={{flex: 1}}
+           torchMode={this.state.torchMode}
+           cameraType={this.state.cameraType}
+          />
+     </View>
+
     );
   }
 }
@@ -74,19 +96,9 @@ class Home extends Component {
     });
   }
 
-  //onPressButton: function(){
-  //   console.log("Button Pressed");
-  // }
-
-  onPressButton(){
-      //debugger;
-      console.log("Button Pressed");
-  }
-
-
   render() {
     return (<View style={styles.container}>
-              <TouchableHighlight underlayColor="grey" onPress={() => this._navigate()}>
+              <TouchableHighlight style={styles.button} underlayColor="grey" onPress={() => this._navigate()}>
                 <Text>Scan</Text>
               </TouchableHighlight>
               <Text>
@@ -130,6 +142,14 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     backgroundColor: '#F5FCFF',
   },
+  containerToolbar: {
+    flex: 1,
+    //justifyContent: 'center',
+    justifyContent: 'flex-start',
+    // https://github.com/facebook/react-native/issues/2957#event-417214498
+    alignItems: 'stretch',
+    backgroundColor: '#F5FCFF',
+  },
   welcome: {
     fontSize: 20,
     textAlign: 'center',
@@ -140,6 +160,14 @@ const styles = StyleSheet.create({
     color: '#333333',
     marginBottom: 5,
   },
+  toolbar: {
+    backgroundColor: '#e9eaed',
+    height: 56,
+  },
+  button: {
+    marginTop: 20,
+    marginBottom: 20,
+  }
 });
 
 AppRegistry.registerComponent('AwesomeFootprints', () => AwesomeFootprints);
