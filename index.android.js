@@ -11,7 +11,8 @@ import {
   TouchableHighlight,
   View,
   Navigator,
-  ToolbarAndroid
+  ToolbarAndroid,
+  BackAndroid
 } from 'react-native';
 import BarcodeScanner from 'react-native-barcodescanner';
 
@@ -64,7 +65,9 @@ class Home extends Component {
   }
 }
 
-
+///////////////////
+// Page 2
+///////////////////
 class ScanToolbar extends Component {
   render() {
     return (<View>
@@ -81,9 +84,6 @@ class ScanToolbar extends Component {
   }
 }
 
-///////////////////
-// Page 2
-///////////////////
 class Scanner extends Component {
   constructor(props) {
     super(props);
@@ -92,28 +92,64 @@ class Scanner extends Component {
       torchMode: 'off',
       cameraType: 'back',
       barCode: '',
-      barCodeType: ''
+      barCodeType: '',
+      // tested and testOnPress are used for testing handler remove
+      tested: false,
+      testOnPress: this._test.bind(this),
+      onBarCodeRead: this.barcodeReceived.bind(this)
     };
+  }
+
+  _navigateResult(){
+    this.props.navigator.push({
+        title: 'DisplayImpacts',
+        component: DisplayImpacts,
+        barCodeType: this.state.barCodeType,
+        barCode: this.state.barCode,
+        popCallback: this._popCallback.bind(this),
+    });
   }
 
   barcodeReceived(e) {
     // debugger
     console.log('Barcode: ' + e.data);
     console.log('type: ' + e.type);
-    //debugger
-    if (e.type === "UPC_A"){
-      //console.log("Inside UPC_A");
-      if (e.data === "722252212122")
-        console.log("Clif Bar");
-    }
-    this.setState( {barCode: e.data, barCodeType: e.type} );
+    // if (e.type === "UPC_A"){
+    //   //console.log("Inside UPC_A");
+    //   if (e.data === "722252212122"){
+    //     console.log("Clif Bar");
+    //   }
+    // }
+
+    // setting onBarCodeRead state to null will remove the onBarCodeRead handler
+    // so we don't get multiple event fired causing multiple transitions
+    // set state is asynchronous
+    // http://stackoverflow.com/questions/30852251/react-native-this-setstate-not-working
+    this.setState( {barCode: e.data, barCodeType: e.type, onBarCodeRead: null}, () => this._navigateResult());
+    //this._navigateResult();
   }
 
-  _navigate() {
+  _navigateBack() {
     this.props.navigator.pop();
   }
 
+
+  _popCallback() {
+    //console.log(this);
+    // rebind the barCodeReceived handler
+    this.setState( {onBarCodeRead: this.barcodeReceived.bind(this)} );
+  }
+
+  _test() {
+    console.log("test");
+    //this.setState({testOnPress: this._test});
+    // once button is clicked, then remove the handler
+    this.setState({tested: true, testOnPress: null});
+  }
+
   render() {
+    var text = this.state.tested ? 'Tested' : 'Untested';
+
     return (
       // Refactor into ScanToolbar
       // <View style={styles.container}>
@@ -128,12 +164,15 @@ class Scanner extends Component {
       //    cameraType={this.state.cameraType}
       //   />
       // </View>
-
       <View style={styles.containerScan}>
-       <ScanToolbar onPress={this._navigate.bind(this)}/>
+       <ScanToolbar onPress={this._navigateBack.bind(this)}/>
+       {/*<TouchableHighlight underlayColor="grey" onPress={this._test.bind(this)}>*/}
+       {/* Making the onPress handler removable (ie. settable to null using state) */}
+       {/*<TouchableHighlight underlayColor="grey" onPress={this.state.testOnPress}>
+          <Text style={{fontSize: 30}}>{text}</Text>
+        </TouchableHighlight>*/}
        <BarcodeScanner
-           onBarCodeRead={this.barcodeReceived.bind(this)}
-           //style={{ height: 400, width: 300 }}
+           onBarCodeRead={this.state.onBarCodeRead}
            style={{flex: 1}}
            torchMode={this.state.torchMode}
            cameraType={this.state.cameraType}
@@ -144,10 +183,43 @@ class Scanner extends Component {
   }
 }
 
+/////////////////
+// Page 3
+/////////////////
+class DisplayImpacts extends Component {
+
+  _navigateBack() {
+    //console.log(this.props.route);
+    this.props.route.popCallback();
+    this.props.navigator.pop();
+  }
+
+  render() {
+    //console.log("this.props.route.barCode: " + this.props.route.barCode)
+    var product;
+    if (this.props.route.barCodeType === "UPC_A"){
+      //console.log("Inside UPC_A");
+      if (this.props.route.barCode === "722252212122"){
+        product = "Clif Bar";
+      }
+    }
+
+    return (<View>
+              <ScanToolbar onPress={this._navigateBack.bind(this)}/>
+              <Text>Display Impacts</Text>
+              <Text>{product}</Text>
+            </View>)
+  }
+
+}
+
+// store the navigator for BackAndroid
+// var _navigator;
 
 class AwesomeFootprints extends Component {
 
   _renderScene (route, navigator) {
+      // _navigator = navigator;
       var Component = route.component;
       return (
         <Component {...route.props} navigator={navigator} route={route} />
@@ -169,6 +241,8 @@ class AwesomeFootprints extends Component {
     );
   }
 }
+
+
 
 
 const styles = StyleSheet.create({
@@ -238,3 +312,13 @@ const styles = StyleSheet.create({
 });
 
 AppRegistry.registerComponent('AwesomeFootprints', () => AwesomeFootprints);
+
+
+//BackAndroid.addEventListener('hardwareBackPress', function() {
+    //  if (!this.onMainScreen()) {
+    //    this.goBack();
+    //    return true;
+    //  }
+    //  return false;
+    //_navigator.pop();
+//});
