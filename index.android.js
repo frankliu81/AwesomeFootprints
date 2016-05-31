@@ -15,6 +15,7 @@ import {
   BackAndroid
 } from 'react-native';
 import BarcodeScanner from 'react-native-barcodescanner';
+import _ from 'underscore';
 
 ///////////////////
 // Page 1
@@ -28,7 +29,7 @@ class HomeToolbar extends Component {
                   <Text style={styles.toolbarButtonText}>Scan</Text>
                 </TouchableHighlight>
                 <Text style={styles.toolbarTitle}>
-                  TreadLight.ly
+                  Awesome Footprints!
                 </Text>
                 <TouchableHighlight style={styles.toolbarButton} underlayColor="grey" onPress={this.props.onPress}>
                   <Text style={styles.toolbarButtonText}>Compare</Text>
@@ -77,7 +78,7 @@ class ScanToolbar extends Component {
                   <Text style={styles.toolbarButtonText}>Back</Text>
                 </TouchableHighlight>
                 <Text style={styles.toolbarTitleOneButton}>
-                  TreadLight.ly
+                  Awesome Footprints
                 </Text>
               </View>
            </View>)
@@ -96,6 +97,7 @@ class Scanner extends Component {
       // tested and testOnPress are used for testing handler remove
       tested: false,
       testOnPress: this._test.bind(this),
+      // TO UNCOMMENT: dynamic handler removal
       onBarCodeRead: this.barcodeReceived.bind(this)
     };
   }
@@ -106,6 +108,7 @@ class Scanner extends Component {
         component: DisplayImpacts,
         barCodeType: this.state.barCodeType,
         barCode: this.state.barCode,
+        // TO UNCOMMENT: dynamic handler removal
         popCallback: this._popCallback.bind(this),
     });
   }
@@ -125,8 +128,14 @@ class Scanner extends Component {
     // so we don't get multiple event fired causing multiple transitions
     // set state is asynchronous
     // http://stackoverflow.com/questions/30852251/react-native-this-setstate-not-working
-    this.setState( {barCode: e.data, barCodeType: e.type, onBarCodeRead: null}, () => this._navigateResult());
     //this._navigateResult();
+
+    // TO UNCOMMENT: dynamic handler removal
+    this.setState( {barCode: e.data, barCodeType: e.type, onBarCodeRead: null}, () => this._navigateResult());
+
+    // without dynamic handler removal
+    //this.setState( {barCode: e.data, barCodeType: e.type}, () => this._navigateResult() );
+
   }
 
   _navigateBack() {
@@ -137,6 +146,7 @@ class Scanner extends Component {
   _popCallback() {
     //console.log(this);
     // rebind the barCodeReceived handler
+    // TO UNCOMMENT: dynamic handler removal
     this.setState( {onBarCodeRead: this.barcodeReceived.bind(this)} );
   }
 
@@ -149,35 +159,47 @@ class Scanner extends Component {
 
   render() {
     var text = this.state.tested ? 'Tested' : 'Untested';
-
+    // TRY OUT DEBOUNCING:
+    // debounce the call to this.barcodeReceived
+    //var lazyBarcodeReceived = _.debounce( this.barcodeReceived.bind(this), 300 );
+    // alternative of passing in an anonymous funciton that returns a function (which must then be called)
+    //var lazyBarcodeReceived = _.debounce( (e) => this.barcodeReceived(e) , 300 );
     return (
-      // Refactor into ScanToolbar
-      // <View style={styles.container}>
-      //   <TouchableHighlight underlayColor="grey" onPress={() => this._navigate()}>
-      //     <Text>Back</Text>
-      //   </TouchableHighlight>
-      //    <BarcodeScanner
-      //    onBarCodeRead={this.barcodeReceived.bind(this)}
-      //    style={{ height: 400, width: 300 }}
-      //    //style={{flex: 1}}
-      //    torchMode={this.state.torchMode}
-      //    cameraType={this.state.cameraType}
-      //   />
-      // </View>
+
       <View style={styles.containerScan}>
        <ScanToolbar onPress={this._navigateBack.bind(this)}/>
-       {/*<TouchableHighlight underlayColor="grey" onPress={this._test.bind(this)}>*/}
-       {/* Making the onPress handler removable (ie. settable to null using state) */}
-       {/*<TouchableHighlight underlayColor="grey" onPress={this.state.testOnPress}>
-          <Text style={{fontSize: 30}}>{text}</Text>
-        </TouchableHighlight>*/}
        <BarcodeScanner
+           // TO UNCOMMENT: dynamic handler removal
            onBarCodeRead={this.state.onBarCodeRead}
+           // Original
+           //onBarCodeRead={this.barcodeReceived.bind(this)}
+           // using debounce
+           //onBarCodeRead={lazyBarcodeReceived}
            style={{flex: 1}}
            torchMode={this.state.torchMode}
            cameraType={this.state.cameraType}
           />
+          {/* Testing making handler null on blickby insg state */}
+          {/*<TouchableHighlight underlayColor="grey" onPress={this._test.bind(this)}>*/}
+          {/* Making the onPress handler removable (ie. settable to null using state) */}
+          {/*<TouchableHighlight underlayColor="grey" onPress={this.state.testOnPress}>
+             <Text style={{fontSize: 30}}>{text}</Text>
+           </TouchableHighlight>*/}
      </View>
+
+     // Refactor into ScanToolbar
+     // <View style={styles.container}>
+     //   <TouchableHighlight underlayColor="grey" onPress={() => this._navigate()}>
+     //     <Text>Back</Text>
+     //   </TouchableHighlight>
+     //    <BarcodeScanner
+     //    onBarCodeRead={this.barcodeReceived.bind(this)}
+     //    style={{ height: 400, width: 300 }}
+     //    //style={{flex: 1}}
+     //    torchMode={this.state.torchMode}
+     //    cameraType={this.state.cameraType}
+     //   />
+     // </View>
 
     );
   }
@@ -190,6 +212,8 @@ class DisplayImpacts extends Component {
 
   _navigateBack() {
     //console.log(this.props.route);
+
+    // TO UNCOMMENT: dynamic handler removal
     this.props.route.popCallback();
     this.props.navigator.pop();
   }
