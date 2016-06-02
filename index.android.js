@@ -17,6 +17,9 @@ import {
 import BarcodeScanner from 'react-native-barcodescanner';
 import _ from 'underscore';
 
+// get this baseUrl after you run "ngrok http <port>ß"
+var baseUrl = "https://328fe205.ngrok.io";
+
 ///////////////////
 // Page 1
 ///////////////////
@@ -208,6 +211,7 @@ class Scanner extends Component {
 /////////////////
 // Page 3
 /////////////////
+
 class DisplayImpacts extends Component {
 
   _navigateBack() {
@@ -216,6 +220,22 @@ class DisplayImpacts extends Component {
     // TO UNCOMMENT: dynamic handler removal
     this.props.route.popCallback();
     this.props.navigator.pop();
+  }
+
+  getImpacts() {
+    console.log("getImpacts")
+    fetch(baseUrl + "/products/lookup.json?barcode_type=" + this.props.route.barCodeType + "&barcode=" + this.props.route.barCode )
+    .then(function(res) {
+      console.log("fetch returned")
+      console.log(res)
+      return res.json();
+     })
+    .then(function(resJson) {
+      console.log(resJson)
+      return resJson;
+     })
+
+
   }
 
   render() {
@@ -227,6 +247,8 @@ class DisplayImpacts extends Component {
         product = "Clif Bar";
       }
     }
+
+    this.getImpacts();
 
     return (<View>
               <ScanToolbar onPress={this._navigateBack.bind(this)}/>
