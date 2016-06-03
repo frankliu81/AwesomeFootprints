@@ -11,7 +11,6 @@ import {
   TouchableHighlight,
   View,
   Navigator,
-  ToolbarAndroid,
   BackAndroid
 } from 'react-native';
 import BarcodeScanner from 'react-native-barcodescanner';
@@ -31,12 +30,9 @@ class HomeToolbar extends Component {
                 <TouchableHighlight style={styles.toolbarButton} underlayColor="grey" onPress={this.props.onPress}>
                   <Text style={styles.toolbarButtonText}>Scan</Text>
                 </TouchableHighlight>
-                <Text style={styles.toolbarTitle}>
-                  Awesome Footprints!
+                <Text style={styles.toolbarTitleOneButton}>
+                  Awesome Footprints
                 </Text>
-                <TouchableHighlight style={styles.toolbarButton} underlayColor="grey" onPress={this.props.onPress}>
-                  <Text style={styles.toolbarButtonText}>Compare</Text>
-                </TouchableHighlight>
               </View>
             </View>)
   }
@@ -171,6 +167,8 @@ class Scanner extends Component {
 
       <View style={styles.containerScan}>
        <ScanToolbar onPress={this._navigateBack.bind(this)}/>
+       {/*original version 2.0.0 of BarCodeScanner
+       updating to version-2 branch of BarCodeScanner on github is BarCodeScannerPackage*/}
        <BarcodeScanner
            // TO UNCOMMENT: dynamic handler removal
            onBarCodeRead={this.state.onBarCodeRead}
@@ -190,20 +188,6 @@ class Scanner extends Component {
            </TouchableHighlight>*/}
      </View>
 
-     // Refactor into ScanToolbar
-     // <View style={styles.container}>
-     //   <TouchableHighlight underlayColor="grey" onPress={() => this._navigate()}>
-     //     <Text>Back</Text>
-     //   </TouchableHighlight>
-     //    <BarcodeScanner
-     //    onBarCodeRead={this.barcodeReceived.bind(this)}
-     //    style={{ height: 400, width: 300 }}
-     //    //style={{flex: 1}}
-     //    torchMode={this.state.torchMode}
-     //    cameraType={this.state.cameraType}
-     //   />
-     // </View>
-
     );
   }
 }
@@ -213,6 +197,23 @@ class Scanner extends Component {
 /////////////////
 
 class DisplayImpacts extends Component {
+  constructor(props) {
+    super(props);
+
+    this.state = {
+      resJson: {},
+    };
+
+    // bind it once during initialization
+    // bind creates a new function, we only wants to bind once
+    // instead of for example, binding each time on click which
+    // can cause memory leak
+    this.storeImpactJson = this.storeImpactJson.bind(this);
+  }
+
+  componentDidMount(){
+    this.getImpacts();
+  }
 
   _navigateBack() {
     //console.log(this.props.route);
@@ -222,43 +223,90 @@ class DisplayImpacts extends Component {
     this.props.navigator.pop();
   }
 
+  storeImpactJson(resJson) {
+    console.log("resJson")
+    console.log(resJson);
+    this.setState({resJson: resJson});
+    //return resJson;
+   }
+
   getImpacts() {
     console.log("getImpacts")
     fetch(baseUrl + "/products/lookup.json?barcode_type=" + this.props.route.barCodeType + "&barcode=" + this.props.route.barCode )
     .then(function(res) {
-      console.log("fetch returned")
+      console.log("res")
       console.log(res)
       return res.json();
      })
-    .then(function(resJson) {
-      console.log(resJson)
-      return resJson;
-     })
-
-
+    .then(this.storeImpactJson)
   }
 
   render() {
     //console.log("this.props.route.barCode: " + this.props.route.barCode)
-    var product;
-    if (this.props.route.barCodeType === "UPC_A"){
-      //console.log("Inside UPC_A");
-      if (this.props.route.barCode === "722252212122"){
-        product = "Clif Bar";
-      }
+    // var product;
+    // if (this.props.route.barCodeType === "UPC_A"){
+    //   //console.log("Inside UPC_A");
+    //   if (this.props.route.barCode === "722252212122"){
+    //     product = "Clif Bar";
+    //   }
+    // }
+    var impactsView;
+    console.log("this.state.res ", this.state.resJson)
+    if (_.isEmpty(this.state.resJson))
+    {
+      impactsView = <Text>Initializing...</Text>
     }
-
-    this.getImpacts();
+    else {
+      impactsView = <ImpactsView resJson={this.state.resJson}></ImpactsView>
+    }
 
     return (<View>
               <ScanToolbar onPress={this._navigateBack.bind(this)}/>
               <Text>Display Impacts</Text>
-              <Text>{product}</Text>
+              {/*<Text>{JSON.stringify(this.state.resJson)}</Text>*/}
+              {impactsView}
             </View>)
   }
 
 }
 
+class ImpactsView extends Component {
+  constructor(props) {
+    super(props);
+  }
+
+
+  render() {
+    //console.log("ImpactsView");
+    //console.log(this.props.resJson);
+    // JSON.stringify(this.props.resJson);
+    var product = this.props.resJson["product_lookup"]
+    var id = product["id"];
+    var name = product["name"];
+    var barcodeType = product["barcodeType"];
+    var barcode = product["barcode"];
+    var totalImpact = product["total_impact"];
+    var greenhouseGases = totalImpact["Greenhouse Gases"];
+    var energyConsumption = totalImpact["Energy Consumption"];
+    var renewablePercentage = totalImpact["Renewable Percentage"];
+    var waterUse = totalImpact["Water Use"];
+    var waste = totalImpact["Waste"];
+
+    return (<View>
+              <Text>Product Id: {id}</Text>
+              <Text>Name: {name}</Text>
+              <Text>Barcode Type: {barcodeType}</Text>
+              <Text>Barcode: {barcode}</Text>
+              <Text>Total Impacts</Text>
+              <Text>Greenhouse Gases: {greenhouseGases}</Text>
+              <Text>Energy Consumption: {energyConsumption}</Text>
+              <Text>Renewable Percentage: {renewablePercentage}</Text>
+              <Text>Water Use: {waterUse}</Text>
+              <Text>Waste: {waste}</Text>
+            </View>)
+  }
+
+}
 // store the navigator for BackAndroid
 // var _navigator;
 
@@ -289,8 +337,6 @@ class AwesomeFootprints extends Component {
 }
 
 
-
-
 const styles = StyleSheet.create({
   container: {
     flex: 1,
@@ -316,10 +362,6 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     color: '#333333',
     marginBottom: 5,
-  },
-  toolbarAndroid: {
-    backgroundColor: '#e9eaed',
-    height: 56,
   },
   toolbar: {
     backgroundColor:'#81c04d',
