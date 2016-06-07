@@ -10,14 +10,15 @@ import {
   Text,
   TouchableHighlight,
   View,
+  Image,
   Navigator,
   BackAndroid
 } from 'react-native';
 import BarcodeScanner from 'react-native-barcodescanner';
 import _ from 'underscore';
 
-// get this baseUrl after you run "ngrok http <port>ß"
-var baseUrl = "https://328fe205.ngrok.io";
+// get this baseUrl after you run "ngrok http <port>"
+var baseUrl = "http://dd145d4b.ngrok.io";
 
 ///////////////////
 // Page 1
@@ -33,6 +34,15 @@ class HomeToolbar extends Component {
                 <Text style={styles.toolbarTitleOneButton}>
                   Awesome Footprints
                 </Text>
+              </View>
+              <View>
+                <Text style={styles.instructions}>
+                  Press the Scan button, scan the barcode of the product, and pull up the environmental impacts.  It is that simple!
+                </Text>
+                <Image
+                  style={styles.logo}
+                  source={require('./awesome_footprint_400_400.png')}
+                />
               </View>
             </View>)
   }
@@ -224,18 +234,18 @@ class DisplayImpacts extends Component {
   }
 
   storeImpactJson(resJson) {
-    console.log("resJson")
-    console.log(resJson);
+    //console.log("resJson")
+    //console.log(resJson);
     this.setState({resJson: resJson});
     //return resJson;
    }
 
   getImpacts() {
-    console.log("getImpacts")
+    //console.log("getImpacts")
     fetch(baseUrl + "/products/lookup.json?barcode_type=" + this.props.route.barCodeType + "&barcode=" + this.props.route.barCode )
     .then(function(res) {
-      console.log("res")
-      console.log(res)
+      //console.log("res")
+      //console.log(res)
       return res.json();
      })
     .then(this.storeImpactJson)
@@ -251,7 +261,7 @@ class DisplayImpacts extends Component {
     //   }
     // }
     var impactsView;
-    console.log("this.state.res ", this.state.resJson)
+    //console.log("this.state.res ", this.state.resJson)
     if (_.isEmpty(this.state.resJson))
     {
       impactsView = <Text>Initializing...</Text>
@@ -338,6 +348,10 @@ class AwesomeFootprints extends Component {
 
 
 const styles = StyleSheet.create({
+  logo: {
+    flex: 1,
+    resizeMode: 'cover',
+  },
   container: {
     flex: 1,
     justifyContent: 'center',
@@ -361,7 +375,11 @@ const styles = StyleSheet.create({
   instructions: {
     textAlign: 'center',
     color: '#333333',
-    marginBottom: 5,
+    marginTop: 15,
+    marginBottom: 15,
+    marginRight: 15,
+    marginLeft: 15,
+    fontSize: 20,
   },
   toolbar: {
     backgroundColor:'#81c04d',
