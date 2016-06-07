@@ -17,8 +17,8 @@ import {
 import BarcodeScanner from 'react-native-barcodescanner';
 import _ from 'underscore';
 
-// get this baseUrl after you run "ngrok http <port>"
-var baseUrl = "http://dd145d4b.ngrok.io";
+// get this baseUrl after you run "ngrok http <port>" or point to heroku
+var baseUrl = "http://awesome-footprints.herokuapp.com/";
 
 ///////////////////
 // Page 1
@@ -296,11 +296,11 @@ class ImpactsView extends Component {
     var barcodeType = product["barcodeType"];
     var barcode = product["barcode"];
     var totalImpact = product["total_impact"];
-    var greenhouseGases = totalImpact["Greenhouse Gases"];
-    var energyConsumption = totalImpact["Energy Consumption"];
-    var renewablePercentage = totalImpact["Renewable Percentage"];
-    var waterUse = totalImpact["Water Use"];
-    var waste = totalImpact["Waste"];
+    var greenhouseGases = totalImpact["Greenhouse Gases (kg CO2 eq)"];
+    var energyConsumption = totalImpact["Energy Consumption (kWh)"];
+    var renewablePercentage = totalImpact["Renewable Percentage (%)"];
+    var waterUse = totalImpact["Water Use (L)"];
+    var waste = totalImpact["Waste (kg)"];
 
     return (<View>
               <Text>Product Id: {id}</Text>
@@ -308,11 +308,11 @@ class ImpactsView extends Component {
               <Text>Barcode Type: {barcodeType}</Text>
               <Text>Barcode: {barcode}</Text>
               <Text>Total Impacts</Text>
-              <Text>Greenhouse Gases: {greenhouseGases}</Text>
-              <Text>Energy Consumption: {energyConsumption}</Text>
-              <Text>Renewable Percentage: {renewablePercentage}</Text>
-              <Text>Water Use: {waterUse}</Text>
-              <Text>Waste: {waste}</Text>
+              <Text>Greenhouse Gases (kg CO2 eq): {greenhouseGases}</Text>
+              <Text>Energy Consumption (kWh): {energyConsumption}</Text>
+              <Text>Renewable Percentage (%): {renewablePercentage}</Text>
+              <Text>Water Use (L): {waterUse}</Text>
+              <Text>Waste (kg): {waste}</Text>
             </View>)
   }
 
