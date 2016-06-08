@@ -11,6 +11,7 @@ import {
   TouchableHighlight,
   View,
   Image,
+  ListView,
   Navigator,
   BackAndroid
 } from 'react-native';
@@ -37,7 +38,13 @@ class HomeToolbar extends Component {
               </View>
               <View>
                 <Text style={styles.instructions}>
-                  Press the Scan button, scan the barcode of the product, and pull up the environmental impacts.  It is that simple!
+                  {"\n"} Step 1: Press the Scan button
+                </Text>
+                <Text style={styles.instructions}>
+                  {"\n"} Step 2: Scan your product's barcode
+                </Text>
+                <Text style={styles.instructions}>
+                  {"\n"} Step 3: View the environmental impacts.  Simple!
                 </Text>
                 <Image
                   style={styles.logo}
@@ -58,20 +65,6 @@ class Home extends Component {
 
   render() {
     return <HomeToolbar onPress={this._navigate.bind(this)}/>
-          // Below is put into ScanToolbar
-          // return (<View>
-          //           <View style={styles.toolbar}>
-          //             <TouchableHighlight style={styles.toolbarButton} underlayColor="grey" onPress={() => this._navigate()}>
-          //               <Text style={styles.toolbarButtonText}>Scan</Text>
-          //             </TouchableHighlight>
-          //             <Text style={styles.toolbarTitle}>
-          //               TreadLight.ly
-          //             </Text>
-          //             <TouchableHighlight style={styles.toolbarButton} underlayColor="grey" onPress={() => this._navigate()}>
-          //               <Text style={styles.toolbarButtonText}>Compare</Text>
-          //             </TouchableHighlight>
-          //           </View>
-          //         </View>)
   }
 }
 
@@ -272,48 +265,63 @@ class DisplayImpacts extends Component {
 
     return (<View>
               <ScanToolbar onPress={this._navigateBack.bind(this)}/>
-              <Text>Display Impacts</Text>
-              {/*<Text>{JSON.stringify(this.state.resJson)}</Text>*/}
+              <Text style={styles.impactDisplayTitle}>Total Impacts</Text>
               {impactsView}
             </View>)
   }
 
 }
 
-class ImpactsView extends Component {
+class ImpactRowView extends Component {
   constructor(props) {
     super(props);
   }
+  render() {
+    //console.log("ImpactRowView");
+    //console.log(this.props.data);
+    var heading = Object.keys(this.props.data)[0];
+    var value = this.props.data[heading];
+    return (
+      <View style={styles.impactRowContainer}>
+        <Text style={styles.impactRowHeading}>{heading}</Text>
+        <Text style={styles.impactRowValue}>{value}</Text>
+      </View>
+    )
+  }
+}
 
+class ImpactsView extends Component {
+  constructor(props) {
+    super(props);
+    //var ds = new ListView.DataSource({rowHasChanged: (r1, r2) => r1 !== r2});
+    var ds = new ListView.DataSource({rowHasChanged: (r1, r2) => _.isEqual(r1, r2)});
+    this.state = {
+      dataSource: ds.cloneWithRows([]),
+    };
+  }
 
   render() {
-    //console.log("ImpactsView");
-    //console.log(this.props.resJson);
-    // JSON.stringify(this.props.resJson);
+
     var product = this.props.resJson["product_lookup"]
     var id = product["id"];
     var name = product["name"];
     var barcodeType = product["barcodeType"];
     var barcode = product["barcode"];
     var totalImpact = product["total_impact"];
-    var greenhouseGases = totalImpact["Greenhouse Gases (kg CO2 eq)"];
-    var energyConsumption = totalImpact["Energy Consumption (kWh)"];
-    var renewablePercentage = totalImpact["Renewable Percentage (%)"];
-    var waterUse = totalImpact["Water Use (L)"];
-    var waste = totalImpact["Waste (kg)"];
+    //impacts_ds will contain:
+    // [{"Waste (kg)":32},{"Water Use (L)":26},
+    // {"Renewable Percentage (%)":4.4} ... ]"
+    impactsDataSource = [];
+    for (var key in totalImpact) { impactsDataSource.unshift({[key]: totalImpact[key]}); }
 
-    return (<View>
-              <Text>Product Id: {id}</Text>
-              <Text>Name: {name}</Text>
-              <Text>Barcode Type: {barcodeType}</Text>
-              <Text>Barcode: {barcode}</Text>
-              <Text>Total Impacts</Text>
-              <Text>Greenhouse Gases (kg CO2 eq): {greenhouseGases}</Text>
-              <Text>Energy Consumption (kWh): {energyConsumption}</Text>
-              <Text>Renewable Percentage (%): {renewablePercentage}</Text>
-              <Text>Water Use (L): {waterUse}</Text>
-              <Text>Waste (kg): {waste}</Text>
-            </View>)
+    console.log(JSON.stringify(impactsDataSource));
+    return (
+      <ListView
+        dataSource={this.state.dataSource.cloneWithRows(impactsDataSource)}
+        renderRow={(rowData) => <ImpactRowView data={rowData}/>}
+      />
+    )
+
   }
 
 }
@@ -373,13 +381,11 @@ const styles = StyleSheet.create({
     margin: 10,
   },
   instructions: {
-    textAlign: 'center',
     color: '#333333',
-    marginTop: 15,
-    marginBottom: 15,
+    marginBottom: 5,
     marginRight: 15,
     marginLeft: 15,
-    fontSize: 20,
+    fontSize: 16,
   },
   toolbar: {
     backgroundColor:'#81c04d',
@@ -390,8 +396,6 @@ const styles = StyleSheet.create({
   toolbarButton:{
     width: 100,
     marginLeft: 20,
-    //color:'#fff',
-    //textAlign:'center'
   },
   toolbarButtonText:{
     color:'#fff',
@@ -410,11 +414,31 @@ const styles = StyleSheet.create({
     fontWeight:'bold',
     flex:1,
     fontSize: 20,
-  }
-  // button: {
-  //   marginTop: 20,
-  //   marginBottom: 20,
-  // }
+  },
+  impactDisplayTitle:{
+    textAlign: 'center',
+    fontSize: 24,
+    color: 'green',
+    marginTop: 30,
+    marginBottom: 30,
+  },
+  impactRowContainer:{
+    flexWrap: 'wrap',
+    alignItems: 'flex-start',
+    justifyContent: 'space-between',
+    flexDirection:'row',
+    borderWidth: 1,
+    borderColor: 'black',
+    marginLeft: 15,
+    marginRight: 15,
+    paddingBottom: 30,
+  },
+  impactRowHeading:{
+    fontSize: 20,
+  },
+  impactRowValue:{
+    fontSize: 20,
+  },
 });
 
 AppRegistry.registerComponent('AwesomeFootprints', () => AwesomeFootprints);
