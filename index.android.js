@@ -245,14 +245,6 @@ class DisplayImpacts extends Component {
   }
 
   render() {
-    //console.log("this.props.route.barCode: " + this.props.route.barCode)
-    // var product;
-    // if (this.props.route.barCodeType === "UPC_A"){
-    //   //console.log("Inside UPC_A");
-    //   if (this.props.route.barCode === "722252212122"){
-    //     product = "Clif Bar";
-    //   }
-    // }
     var impactsView;
     //console.log("this.state.res ", this.state.resJson)
     if (_.isEmpty(this.state.resJson))
@@ -316,10 +308,18 @@ class ImpactsView extends Component {
 
     console.log(JSON.stringify(impactsDataSource));
     return (
-      <ListView
-        dataSource={this.state.dataSource.cloneWithRows(impactsDataSource)}
-        renderRow={(rowData) => <ImpactRowView data={rowData}/>}
-      />
+      <View>
+        <View>
+          <Text style={styles.productInfo}>Product Id: {id}</Text>
+          <Text style={styles.productInfo}>Name: {name}</Text>
+          <Text style={styles.productInfo}>Barcode Type: {barcodeType}</Text>
+          <Text style={styles.productInfo}>Barcode: {barcode}</Text>
+        </View>
+        <ListView
+          dataSource={this.state.dataSource.cloneWithRows(impactsDataSource)}
+          renderRow={(rowData) => <ImpactRowView data={rowData}/>}
+        />
+      </View>
     )
 
   }
@@ -415,12 +415,17 @@ const styles = StyleSheet.create({
     flex:1,
     fontSize: 20,
   },
+  productInfo:{
+    fontSize: 16,
+    marginLeft: 15,
+    marginBottom: 5,
+  },
   impactDisplayTitle:{
     textAlign: 'center',
     fontSize: 24,
     color: 'green',
-    marginTop: 30,
-    marginBottom: 30,
+    marginTop: 10,
+    marginBottom: 10,
   },
   impactRowContainer:{
     flexWrap: 'wrap',
